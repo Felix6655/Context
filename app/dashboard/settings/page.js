@@ -7,10 +7,12 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
-import { Layers, ArrowLeft, Loader2, Download, LogOut, Settings } from 'lucide-react'
+import { Layers, ArrowLeft, Loader2, Download, LogOut, Settings, User, Bell } from 'lucide-react'
 import { toast } from 'sonner'
+import { ReflectionSettings } from '@/components/reflection'
 
 export default function SettingsPage() {
   const router = useRouter()
@@ -18,10 +20,14 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false)
   const [exporting, setExporting] = useState(false)
   const [user, setUser] = useState(null)
+  const [activeTab, setActiveTab] = useState('profile')
   
   // Profile state
   const [fullName, setFullName] = useState('')
   const [perspectiveIntensity, setPerspectiveIntensity] = useState('medium')
+  
+  // Reflection settings state
+  const [reflectionSettings, setReflectionSettings] = useState(null)
   
   useEffect(() => {
     loadProfile()
