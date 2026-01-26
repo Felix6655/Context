@@ -170,17 +170,17 @@ export default function SettingsPage() {
             </Link>
             
             <div className="hidden md:flex items-center gap-1">
-              <Link href="/app">
+              <Link href="/dashboard">
                 <Button variant="ghost" size="sm">Dashboard</Button>
               </Link>
-              <Link href="/app/timeline">
+              <Link href="/dashboard/timeline">
                 <Button variant="ghost" size="sm">Timeline</Button>
               </Link>
             </div>
           </div>
           
           <div className="flex items-center gap-2">
-            <Link href="/app/settings">
+            <Link href="/dashboard/settings">
               <Button variant="ghost" size="icon" className="text-foreground">
                 <Settings className="w-4 h-4" />
               </Button>
@@ -196,7 +196,7 @@ export default function SettingsPage() {
       <main className="container max-w-2xl mx-auto px-6 py-8">
         {/* Header */}
         <div className="mb-8">
-          <Link href="/app" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4">
+          <Link href="/dashboard" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4">
             <ArrowLeft className="w-4 h-4" />
             Back to dashboard
           </Link>

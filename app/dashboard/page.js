@@ -165,10 +165,10 @@ export default function DashboardPage() {
             </Link>
             
             <div className="hidden md:flex items-center gap-1">
-              <Link href="/app">
+              <Link href="/dashboard">
                 <Button variant="ghost" size="sm" className="text-foreground">Dashboard</Button>
               </Link>
-              <Link href="/app/timeline">
+              <Link href="/dashboard/timeline">
                 <Button variant="ghost" size="sm">Timeline</Button>
               </Link>
             </div>
@@ -181,7 +181,7 @@ export default function DashboardPage() {
               </Link>
             ) : (
               <>
-                <Link href="/app/settings">
+                <Link href="/dashboard/settings">
                   <Button variant="ghost" size="icon">
                     <Settings className="w-4 h-4" />
                   </Button>
@@ -217,13 +217,13 @@ export default function DashboardPage() {
         <section className="mb-8">
           <h2 className="text-lg font-medium mb-4">Create</h2>
           <div className="flex gap-4">
-            <Link href="/app/receipt/new">
+            <Link href="/dashboard/receipt/new">
               <Button className="gap-2">
                 <Plus className="w-4 h-4" />
                 New Receipt
               </Button>
             </Link>
-            <Link href="/app/moment/new">
+            <Link href="/dashboard/moment/new">
               <Button variant="outline" className="gap-2">
                 <Plus className="w-4 h-4" />
                 New Moment
@@ -341,7 +341,7 @@ export default function DashboardPage() {
                       Moments
                     </TabsTrigger>
                   </TabsList>
-                  <Link href="/app/timeline">
+                  <Link href="/dashboard/timeline">
                     <Button variant="ghost" size="sm" className="gap-1">
                       View all <ChevronRight className="w-4 h-4" />
                     </Button>
@@ -391,7 +391,7 @@ export default function DashboardPage() {
                       <CardContent className="p-8 text-center">
                         <FileText className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
                         <p className="text-muted-foreground mb-4">No receipts yet</p>
-                        <Link href="/app/receipt/new">
+                        <Link href="/dashboard/receipt/new">
                           <Button size="sm">Create your first receipt</Button>
                         </Link>
                       </CardContent>
@@ -435,7 +435,7 @@ export default function DashboardPage() {
                       <CardContent className="p-8 text-center">
                         <Clock className="w-8 h-8 text-muted-foreground mx-auto mb-3" />
                         <p className="text-muted-foreground mb-4">No moments yet</p>
-                        <Link href="/app/moment/new">
+                        <Link href="/dashboard/moment/new">
                           <Button size="sm">Capture your first moment</Button>
                         </Link>
                       </CardContent>

@@ -125,7 +125,7 @@ export default function NewReceiptPage() {
       <div className="container max-w-2xl mx-auto px-6 py-8">
         {/* Header */}
         <div className="mb-8">
-          <Link href="/app" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4">
+          <Link href="/dashboard" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4">
             <ArrowLeft className="w-4 h-4" />
             Back to dashboard
           </Link>
@@ -311,7 +311,7 @@ export default function NewReceiptPage() {
           </Card>
           
           <div className="flex justify-end gap-4 mt-6">
-            <Link href="/app">
+            <Link href="/dashboard">
               <Button type="button" variant="outline">Cancel</Button>
             </Link>
             <Button type="submit" disabled={loading}>

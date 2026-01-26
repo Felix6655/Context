@@ -189,7 +189,7 @@ export default function MomentDetailPage() {
         {/* Header */}
         <div className="flex items-start justify-between mb-8">
           <div>
-            <Link href="/app" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4">
+            <Link href="/dashboard" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4">
               <ArrowLeft className="w-4 h-4" />
               Back to dashboard
             </Link>

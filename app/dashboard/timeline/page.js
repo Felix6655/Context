@@ -152,10 +152,10 @@ export default function TimelinePage() {
             </Link>
             
             <div className="hidden md:flex items-center gap-1">
-              <Link href="/app">
+              <Link href="/dashboard">
                 <Button variant="ghost" size="sm">Dashboard</Button>
               </Link>
-              <Link href="/app/timeline">
+              <Link href="/dashboard/timeline">
                 <Button variant="ghost" size="sm" className="text-foreground">Timeline</Button>
               </Link>
             </div>
@@ -168,7 +168,7 @@ export default function TimelinePage() {
               </Link>
             ) : (
               <>
-                <Link href="/app/settings">
+                <Link href="/dashboard/settings">
                   <Button variant="ghost" size="icon">
                     <Settings className="w-4 h-4" />
                   </Button>
@@ -378,10 +378,10 @@ export default function TimelinePage() {
                   <>
                     <p className="mb-4">No entries yet</p>
                     <div className="flex gap-4 justify-center">
-                      <Link href="/app/receipt/new">
+                      <Link href="/dashboard/receipt/new">
                         <Button>New Receipt</Button>
                       </Link>
-                      <Link href="/app/moment/new">
+                      <Link href="/dashboard/moment/new">
                         <Button variant="outline">New Moment</Button>
                       </Link>
                     </div>
