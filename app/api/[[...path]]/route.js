@@ -620,6 +620,114 @@ export async function POST(request, { params }) {
       return NextResponse.json({ success: true })
     }
     
+    // Save weekly reflection
+    if (pathStr === 'reflections/weekly') {
+      const body = await request.json()
+      
+      const reflection = {
+        id: uuidv4(),
+        user_id: user.id,
+        period_start: body.period?.start || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+        period_end: body.period?.end || new Date().toISOString(),
+        summary: body.summary || {},
+        reflection_question: body.reflection?.question || null,
+        suggested_action: body.reflection?.suggested_action || null,
+        tone: body.tone || 'gentle',
+        user_notes: body.user_notes || null,
+        viewed: true,
+        viewed_at: new Date().toISOString()
+      }
+      
+      const { data, error } = await authClient
+        .from('weekly_reflections')
+        .insert([reflection])
+        .select()
+        .single()
+      
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 })
+      }
+      
+      // Update last reflection timestamp
+      await authClient
+        .from('profiles')
+        .update({ last_weekly_reflection_at: new Date().toISOString() })
+        .eq('id', user.id)
+      
+      return NextResponse.json({ reflection: data, saved: true })
+    }
+    
+    // Create notification
+    if (pathStr === 'notifications') {
+      const body = await request.json()
+      
+      const notification = createNotification(body.type, {
+        title: body.title,
+        message: body.message,
+        metadata: body.metadata
+      })
+      
+      if (!notification) {
+        return NextResponse.json({ error: 'Invalid notification type' }, { status: 400 })
+      }
+      
+      const { data, error } = await authClient
+        .from('notification_events')
+        .insert([{ ...notification, user_id: user.id }])
+        .select()
+        .single()
+      
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 })
+      }
+      
+      return NextResponse.json({ notification: data })
+    }
+    
+    // Mark notification as read
+    if (path[0] === 'notifications' && path[1] && path[2] === 'read') {
+      const { error } = await authClient
+        .from('notification_events')
+        .update({ read: true, read_at: new Date().toISOString() })
+        .eq('id', path[1])
+        .eq('user_id', user.id)
+      
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 })
+      }
+      
+      return NextResponse.json({ success: true })
+    }
+    
+    // Dismiss notification
+    if (path[0] === 'notifications' && path[1] && path[2] === 'dismiss') {
+      const { error } = await authClient
+        .from('notification_events')
+        .update({ dismissed: true, dismissed_at: new Date().toISOString() })
+        .eq('id', path[1])
+        .eq('user_id', user.id)
+      
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 })
+      }
+      
+      return NextResponse.json({ success: true })
+    }
+    
+    // Dismiss silence prompt (track in profile)
+    if (pathStr === 'reflections/silence/dismiss') {
+      const { error } = await authClient
+        .from('profiles')
+        .update({ last_silence_prompt_at: new Date().toISOString() })
+        .eq('id', user.id)
+      
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 })
+      }
+      
+      return NextResponse.json({ success: true })
+    }
+    
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
     
   } catch (error) {
