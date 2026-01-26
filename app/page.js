@@ -21,7 +21,7 @@ export default function LandingPage() {
             <Link href="/auth">
               <Button variant="ghost" size="sm">Sign in</Button>
             </Link>
-            <Link href="/app">
+            <Link href="/dashboard">
               <Button size="sm">Get started</Button>
             </Link>
           </div>
@@ -38,7 +38,7 @@ export default function LandingPage() {
             See where life went stale. Get perspective before regret.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/app">
+            <Link href="/dashboard">
               <Button size="lg" className="gap-2">
                 Get started <ArrowRight className="w-4 h-4" />
               </Button>
@@ -176,7 +176,7 @@ export default function LandingPage() {
           <p className="text-muted-foreground mb-8">
             No streaks. No gamification. No preachy copy. Just a calm space for reflection.
           </p>
-          <Link href="/app">
+          <Link href="/dashboard">
             <Button size="lg" className="gap-2">
               Open Context <ArrowRight className="w-4 h-4" />
             </Button>
