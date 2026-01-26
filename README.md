@@ -114,7 +114,7 @@ git push
 │   ├── auth/
 │   │   ├── page.js          # Sign in/up
 │   │   └── callback/page.js # Magic link callback
-│   ├── app/
+│   ├── dashboard/
 │   │   ├── page.js          # Dashboard
 │   │   ├── receipt/
 │   │   │   ├── new/page.js  # Create receipt
