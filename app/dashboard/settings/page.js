@@ -71,11 +71,33 @@ export default function SettingsPage() {
         setFullName(profileData.profile.full_name || '')
         setPerspectiveIntensity(profileData.profile.perspective_intensity || 'medium')
       }
+      
+      // Get reflection settings
+      const reflectionRes = await fetch('/api/reflections/settings', { headers: getAuthHeaders() })
+      const reflectionData = await reflectionRes.json()
+      setReflectionSettings(reflectionData.settings)
     } catch (error) {
       console.error('Failed to load profile:', error)
       toast.error('Failed to load profile')
     } finally {
       setLoading(false)
+    }
+  }
+  
+  const handleSaveReflectionSettings = async (settings) => {
+    try {
+      const res = await fetch('/api/reflections/settings', {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(settings)
+      })
+      
+      if (!res.ok) throw new Error('Failed to save')
+      
+      const data = await res.json()
+      setReflectionSettings(data.settings)
+    } catch (error) {
+      throw error
     }
   }
   
