@@ -18,7 +18,7 @@ export default function AuthCallbackPage() {
       if (refreshToken) {
         localStorage.setItem('supabase_refresh_token', refreshToken)
       }
-      router.push('/app')
+      router.push('/dashboard')
     } else {
       // Check for hash fragment (Supabase sometimes uses this)
       const hash = window.location.hash
@@ -32,7 +32,7 @@ export default function AuthCallbackPage() {
           if (refresh) {
             localStorage.setItem('supabase_refresh_token', refresh)
           }
-          router.push('/app')
+          router.push('/dashboard')
           return
         }
       }

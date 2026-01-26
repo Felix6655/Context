@@ -53,7 +53,7 @@ export default function AuthPage() {
       }
       
       toast.success('Signed in successfully')
-      router.push('/app')
+      router.push('/dashboard')
     } catch (error) {
       toast.error(error.message)
     } finally {
@@ -90,7 +90,7 @@ export default function AuthPage() {
         localStorage.setItem('supabase_token', data.session.access_token)
         localStorage.setItem('supabase_refresh_token', data.session.refresh_token)
         toast.success('Account created successfully')
-        router.push('/app')
+        router.push('/dashboard')
       }
     } catch (error) {
       toast.error(error.message)
