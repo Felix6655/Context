@@ -213,6 +213,9 @@ export default function DashboardPage() {
               <Link href="/dashboard/timeline">
                 <Button variant="ghost" size="sm">Timeline</Button>
               </Link>
+              <Link href="/dashboard/reflections">
+                <Button variant="ghost" size="sm">Reflections</Button>
+              </Link>
             </div>
           </div>
           
