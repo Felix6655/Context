@@ -221,7 +221,7 @@ export default function SettingsPage() {
         </div>
       </nav>
       
-      <main className="container max-w-2xl mx-auto px-6 py-8">
+      <main className="container max-w-3xl mx-auto px-6 py-8">
         {/* Header */}
         <div className="mb-8">
           <Link href="/dashboard" className="inline-flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors mb-4">
@@ -232,72 +232,94 @@ export default function SettingsPage() {
           <p className="text-muted-foreground">{user?.email}</p>
         </div>
         
-        {/* Profile Settings */}
-        <Card className="border-border/50 mb-6">
-          <CardHeader>
-            <CardTitle>Profile</CardTitle>
-            <CardDescription>Your personal information</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name</Label>
-              <Input
-                id="fullName"
-                placeholder="Your name"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-              />
-            </div>
+        <Tabs value={activeTab} onValueChange={setActiveTab}>
+          <TabsList className="mb-6">
+            <TabsTrigger value="profile" className="gap-2">
+              <User className="w-4 h-4" />
+              Profile
+            </TabsTrigger>
+            <TabsTrigger value="reflections" className="gap-2">
+              <Bell className="w-4 h-4" />
+              Reflections
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="profile" className="space-y-6">
+            {/* Profile Settings */}
+            <Card className="border-border/50">
+              <CardHeader>
+                <CardTitle>Profile</CardTitle>
+                <CardDescription>Your personal information</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="fullName">Full Name</Label>
+                  <Input
+                    id="fullName"
+                    placeholder="Your name"
+                    value={fullName}
+                    onChange={(e) => setFullName(e.target.value)}
+                  />
+                </div>
+                
+                <Separator />
+                
+                <div className="space-y-2">
+                  <Label>Perspective Intensity</Label>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    Controls how often perspective prompts appear
+                  </p>
+                  <Select value={perspectiveIntensity} onValueChange={setPerspectiveIntensity}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="low">Low - Fewer prompts</SelectItem>
+                      <SelectItem value="medium">Medium - Balanced</SelectItem>
+                      <SelectItem value="high">High - More prompts</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                <div className="flex justify-end">
+                  <Button onClick={handleSave} disabled={saving}>
+                    {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Save Changes
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
             
-            <Separator />
-            
-            <div className="space-y-2">
-              <Label>Perspective Intensity</Label>
-              <p className="text-sm text-muted-foreground mb-2">
-                Controls how often perspective prompts appear
-              </p>
-              <Select value={perspectiveIntensity} onValueChange={setPerspectiveIntensity}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="low">Low - Fewer prompts</SelectItem>
-                  <SelectItem value="medium">Medium - Balanced</SelectItem>
-                  <SelectItem value="high">High - More prompts</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="flex justify-end">
-              <Button onClick={handleSave} disabled={saving}>
-                {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Save Changes
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-        
-        {/* Data Export */}
-        <Card className="border-border/50">
-          <CardHeader>
-            <CardTitle>Data Export</CardTitle>
-            <CardDescription>Download all your data as JSON</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground mb-4">
-              Export all your receipts and moments as a JSON file. 
-              This includes all your decision context, moments, and tags.
-            </p>
-            <Button variant="outline" onClick={handleExport} disabled={exporting}>
-              {exporting ? (
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Download className="mr-2 h-4 w-4" />
-              )}
-              Export Data
-            </Button>
-          </CardContent>
-        </Card>
+            {/* Data Export */}
+            <Card className="border-border/50">
+              <CardHeader>
+                <CardTitle>Data Export</CardTitle>
+                <CardDescription>Download all your data as JSON</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Export all your receipts and moments as a JSON file. 
+                  This includes all your decision context, moments, and tags.
+                </p>
+                <Button variant="outline" onClick={handleExport} disabled={exporting}>
+                  {exporting ? (
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  ) : (
+                    <Download className="mr-2 h-4 w-4" />
+                  )}
+                  Export Data
+                </Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="reflections">
+            <ReflectionSettings
+              initialSettings={reflectionSettings}
+              onSave={handleSaveReflectionSettings}
+            />
+          </TabsContent>
+        </Tabs>
       </main>
     </div>
   )
