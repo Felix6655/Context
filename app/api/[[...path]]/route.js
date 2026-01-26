@@ -765,14 +765,40 @@ export async function PUT(request, { params }) {
         .eq('id', user.id)
         .single()
       
+      // Build update object with all possible fields
+      const updateData = {
+        full_name: body.full_name,
+        perspective_intensity: body.perspective_intensity
+      }
+      
+      // Add reflection settings if provided
+      if (body.weekly_reflections_enabled !== undefined) {
+        updateData.weekly_reflections_enabled = body.weekly_reflections_enabled
+      }
+      if (body.silence_nudges_enabled !== undefined) {
+        updateData.silence_nudges_enabled = body.silence_nudges_enabled
+      }
+      if (body.capture_reminders_enabled !== undefined) {
+        updateData.capture_reminders_enabled = body.capture_reminders_enabled
+      }
+      if (body.reflection_day !== undefined) {
+        updateData.reflection_day = body.reflection_day
+      }
+      if (body.reflection_hour !== undefined) {
+        updateData.reflection_hour = body.reflection_hour
+      }
+      if (body.reflection_tone !== undefined) {
+        updateData.reflection_tone = body.reflection_tone
+      }
+      if (body.silence_threshold_days !== undefined) {
+        updateData.silence_threshold_days = body.silence_threshold_days
+      }
+      
       let result
       if (existing) {
         result = await authClient
           .from('profiles')
-          .update({
-            full_name: body.full_name,
-            perspective_intensity: body.perspective_intensity
-          })
+          .update(updateData)
           .eq('id', user.id)
           .select()
           .single()
@@ -781,8 +807,7 @@ export async function PUT(request, { params }) {
           .from('profiles')
           .insert([{
             id: user.id,
-            full_name: body.full_name,
-            perspective_intensity: body.perspective_intensity
+            ...updateData
           }])
           .select()
           .single()
@@ -793,6 +818,32 @@ export async function PUT(request, { params }) {
       }
       
       return NextResponse.json({ profile: result.data })
+    }
+    
+    // Update reflection settings specifically
+    if (pathStr === 'reflections/settings') {
+      const body = await request.json()
+      
+      const { data, error } = await authClient
+        .from('profiles')
+        .update({
+          weekly_reflections_enabled: body.weekly_reflections_enabled,
+          silence_nudges_enabled: body.silence_nudges_enabled,
+          capture_reminders_enabled: body.capture_reminders_enabled,
+          reflection_day: body.reflection_day,
+          reflection_hour: body.reflection_hour,
+          reflection_tone: body.reflection_tone,
+          silence_threshold_days: body.silence_threshold_days
+        })
+        .eq('id', user.id)
+        .select()
+        .single()
+      
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 })
+      }
+      
+      return NextResponse.json({ settings: data })
     }
     
     // Update receipt
