@@ -9,10 +9,11 @@ import { Badge } from '@/components/ui/badge'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { 
   Layers, FileText, Clock, Plus, AlertTriangle, Lightbulb, 
-  LogOut, Settings, List, X, ChevronRight, User
+  LogOut, Settings, List, X, ChevronRight, User, Calendar
 } from 'lucide-react'
 import { toast } from 'sonner'
 import { demoReceipts, demoMoments, demoPerspectiveCards, demoDeadZone } from '@/lib/demo-data'
+import { SilencePrompt, PerspectiveCard } from '@/components/reflection'
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -25,6 +26,11 @@ export default function DashboardPage() {
   const [moments, setMoments] = useState([])
   const [perspectiveCards, setPerspectiveCards] = useState([])
   const [deadZone, setDeadZone] = useState({ flags: [], summary: {} })
+  
+  // Reflection Engine State
+  const [reflectionStatus, setReflectionStatus] = useState(null)
+  const [silencePrompt, setSilencePrompt] = useState(null)
+  const [contextualCard, setContextualCard] = useState(null)
   
   useEffect(() => {
     checkAuth()
