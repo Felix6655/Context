@@ -3,6 +3,20 @@ import { supabase, getAdminClient } from '../../../lib/supabase'
 import { setupSQL } from '../../../lib/database-setup'
 import { computeDeadZoneFlags } from '../../../lib/deadzone'
 import { generatePerspectiveCards } from '../../../lib/perspective'
+import { 
+  detectSilence, 
+  generateSilencePrompt, 
+  generateWeeklyReflection,
+  shouldShowPerspectiveCard,
+  selectPerspectiveCard
+} from '../../../lib/reflection-engine'
+import {
+  shouldCreateNotification,
+  createNotification,
+  getActiveNotifications,
+  getUnreadCount,
+  isWeeklyReflectionTime
+} from '../../../lib/notification-manager'
 import { v4 as uuidv4 } from 'uuid'
 
 // Helper to get current user from request
