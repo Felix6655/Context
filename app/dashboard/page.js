@@ -89,27 +89,63 @@ export default function DashboardPage() {
     try {
       const headers = getAuthHeaders()
       
-      const [receiptsRes, momentsRes, cardsRes, deadZoneRes] = await Promise.all([
+      const [receiptsRes, momentsRes, cardsRes, deadZoneRes, reflectionRes] = await Promise.all([
         fetch('/api/receipts', { headers }),
         fetch('/api/moments', { headers }),
         fetch('/api/perspective-cards', { headers }),
-        fetch('/api/deadzone', { headers })
+        fetch('/api/deadzone', { headers }),
+        fetch('/api/reflections/status', { headers })
       ])
       
-      const [receiptsData, momentsData, cardsData, deadZoneData] = await Promise.all([
+      const [receiptsData, momentsData, cardsData, deadZoneData, reflectionData] = await Promise.all([
         receiptsRes.json(),
         momentsRes.json(),
         cardsRes.json(),
-        deadZoneRes.json()
+        deadZoneRes.json(),
+        reflectionRes.json()
       ])
       
       setReceipts(receiptsData.receipts || [])
       setMoments(momentsData.moments || [])
       setPerspectiveCards(cardsData.cards || [])
       setDeadZone({ flags: deadZoneData.flags || [], summary: deadZoneData.summary || {} })
+      
+      // Reflection engine data
+      setReflectionStatus(reflectionData)
+      if (reflectionData.silence?.prompt) {
+        setSilencePrompt(reflectionData.silence.prompt)
+      }
+      if (reflectionData.perspectiveCards?.selected) {
+        setContextualCard(reflectionData.perspectiveCards.selected)
+      }
     } catch (error) {
       console.error('Failed to load data:', error)
       toast.error('Failed to load data')
+    }
+  }
+  
+  const dismissSilencePrompt = async () => {
+    try {
+      await fetch('/api/reflections/silence/dismiss', {
+        method: 'POST',
+        headers: getAuthHeaders()
+      })
+      setSilencePrompt(null)
+    } catch (error) {
+      console.error('Failed to dismiss silence prompt:', error)
+    }
+  }
+  
+  const dismissContextualCard = async (cardId) => {
+    try {
+      await fetch(`/api/perspective-cards/${cardId}/dismiss`, {
+        method: 'POST',
+        headers: getAuthHeaders()
+      })
+      setContextualCard(null)
+      setPerspectiveCards(cards => cards.filter(c => c.id !== cardId))
+    } catch (error) {
+      console.error('Failed to dismiss card:', error)
     }
   }
   
