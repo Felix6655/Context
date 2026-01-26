@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
-import { supabase, getAdminClient } from '../../../../lib/supabase'
-import { setupSQL } from '../../../../lib/database-setup'
-import { computeDeadZoneFlags } from '../../../../lib/deadzone'
-import { generatePerspectiveCards } from '../../../../lib/perspective'
+import { supabase, getAdminClient } from '../../../lib/supabase'
+import { setupSQL } from '../../../lib/database-setup'
+import { computeDeadZoneFlags } from '../../../lib/deadzone'
+import { generatePerspectiveCards } from '../../../lib/perspective'
 import { v4 as uuidv4 } from 'uuid'
 
 // Helper to get current user from request
