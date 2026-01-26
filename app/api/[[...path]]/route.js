@@ -270,6 +270,176 @@ export async function GET(request, { params }) {
       return NextResponse.json({ cards: allCards || [] })
     }
     
+    // Get reflection status (silence detection + weekly check)
+    if (pathStr === 'reflections/status') {
+      // Get user profile for settings
+      const { data: profile } = await authClient
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+      
+      const settings = profile || {}
+      
+      // Get receipts and moments
+      const { data: receipts } = await authClient.from('receipts').select('*').eq('user_id', user.id)
+      const { data: moments } = await authClient.from('moments').select('*').eq('user_id', user.id)
+      
+      // Get existing notifications
+      const { data: notifications } = await authClient
+        .from('notification_events')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(20)
+      
+      // Detect silence
+      const silenceInfo = detectSilence(receipts || [], moments || [], settings)
+      let silencePrompt = null
+      
+      if (silenceInfo.inSilence && settings.silence_nudges_enabled !== false) {
+        silencePrompt = generateSilencePrompt(silenceInfo, settings, notifications || [])
+      }
+      
+      // Check if weekly reflection is due
+      const weeklyReflectionDue = isWeeklyReflectionTime(settings)
+      
+      // Get perspective cards for contextual display
+      const { data: perspectiveCards } = await authClient
+        .from('perspective_cards')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('dismissed', false)
+      
+      return NextResponse.json({
+        silence: {
+          ...silenceInfo,
+          prompt: silencePrompt
+        },
+        weeklyReflection: {
+          due: weeklyReflectionDue,
+          enabled: settings.weekly_reflections_enabled !== false
+        },
+        perspectiveCards: {
+          count: (perspectiveCards || []).length,
+          shouldShow: shouldShowPerspectiveCard('dashboard', perspectiveCards || [], settings),
+          selected: selectPerspectiveCard(perspectiveCards || [], 'dashboard')
+        },
+        settings: {
+          tone: settings.reflection_tone || 'gentle',
+          silenceThreshold: settings.silence_threshold_days || 5
+        }
+      })
+    }
+    
+    // Get or generate weekly reflection
+    if (pathStr === 'reflections/weekly') {
+      const { data: profile } = await authClient
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+      
+      const settings = profile || {}
+      
+      // Check for existing reflection this week
+      const weekStart = new Date()
+      weekStart.setDate(weekStart.getDate() - 7)
+      
+      const { data: existingReflection } = await authClient
+        .from('weekly_reflections')
+        .select('*')
+        .eq('user_id', user.id)
+        .gte('created_at', weekStart.toISOString())
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .single()
+      
+      if (existingReflection) {
+        return NextResponse.json({ reflection: existingReflection, isNew: false })
+      }
+      
+      // Generate new reflection
+      const { data: receipts } = await authClient.from('receipts').select('*').eq('user_id', user.id)
+      const { data: moments } = await authClient.from('moments').select('*').eq('user_id', user.id)
+      
+      const reflection = generateWeeklyReflection(
+        receipts || [],
+        moments || [],
+        receipts || [],
+        settings
+      )
+      
+      return NextResponse.json({ 
+        reflection: {
+          ...reflection,
+          id: null,
+          saved: false
+        }, 
+        isNew: true 
+      })
+    }
+    
+    // Get past weekly reflections
+    if (pathStr === 'reflections/history') {
+      const { data: reflections } = await authClient
+        .from('weekly_reflections')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+        .limit(12)
+      
+      return NextResponse.json({ reflections: reflections || [] })
+    }
+    
+    // Get notifications
+    if (pathStr === 'notifications') {
+      const { data: notifications } = await authClient
+        .from('notification_events')
+        .select('*')
+        .eq('user_id', user.id)
+        .eq('dismissed', false)
+        .order('created_at', { ascending: false })
+        .limit(20)
+      
+      const active = getActiveNotifications(notifications || [])
+      const unreadCount = getUnreadCount(notifications || [])
+      
+      return NextResponse.json({ 
+        notifications: active,
+        unreadCount
+      })
+    }
+    
+    // Get reflection settings
+    if (pathStr === 'reflections/settings') {
+      const { data: profile } = await authClient
+        .from('profiles')
+        .select(`
+          weekly_reflections_enabled,
+          silence_nudges_enabled,
+          capture_reminders_enabled,
+          reflection_day,
+          reflection_hour,
+          reflection_tone,
+          silence_threshold_days
+        `)
+        .eq('id', user.id)
+        .single()
+      
+      return NextResponse.json({ 
+        settings: profile || {
+          weekly_reflections_enabled: true,
+          silence_nudges_enabled: true,
+          capture_reminders_enabled: false,
+          reflection_day: 0,
+          reflection_hour: 18,
+          reflection_tone: 'gentle',
+          silence_threshold_days: 5
+        }
+      })
+    }
+    
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
     
   } catch (error) {
