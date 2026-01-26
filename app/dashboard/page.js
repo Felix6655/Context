@@ -258,6 +258,52 @@ export default function DashboardPage() {
       )}
       
       <main className="container mx-auto px-6 py-8">
+        {/* Silence Prompt - shown when user has been quiet */}
+        {!isDemo && silencePrompt && (
+          <section className="mb-6">
+            <SilencePrompt 
+              prompt={silencePrompt} 
+              onDismiss={dismissSilencePrompt}
+            />
+          </section>
+        )}
+        
+        {/* Contextual Perspective Card */}
+        {!isDemo && contextualCard && !silencePrompt && (
+          <section className="mb-6">
+            <PerspectiveCard
+              card={contextualCard}
+              context="dashboard"
+              onDismiss={dismissContextualCard}
+              onViewRelated={(type, id) => router.push(`/dashboard/${type}/${id}`)}
+            />
+          </section>
+        )}
+        
+        {/* Weekly Reflection Prompt */}
+        {!isDemo && reflectionStatus?.weeklyReflection?.due && (
+          <section className="mb-6">
+            <Card className="border-border/50 bg-gradient-to-r from-purple-500/5 to-transparent">
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-lg bg-purple-500/10 flex items-center justify-center">
+                      <Calendar className="w-5 h-5 text-purple-500" />
+                    </div>
+                    <div>
+                      <p className="font-medium">Weekly reflection ready</p>
+                      <p className="text-sm text-muted-foreground">Take a moment to review your week</p>
+                    </div>
+                  </div>
+                  <Link href="/dashboard/reflections">
+                    <Button size="sm" variant="outline">View</Button>
+                  </Link>
+                </div>
+              </CardContent>
+            </Card>
+          </section>
+        )}
+        
         {/* Quick Actions */}
         <section className="mb-8">
           <h2 className="text-lg font-medium mb-4">Create</h2>
