@@ -1135,6 +1135,28 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ settings: data })
     }
     
+    // Update memory loop settings
+    if (pathStr === 'memory-loop/settings') {
+      const body = await request.json()
+      
+      const { data, error } = await authClient
+        .from('profiles')
+        .update({
+          outcome_checks_enabled: body.outcome_checks_enabled,
+          outcome_delay_days: body.outcome_delay_days,
+          insights_enabled: body.insights_enabled
+        })
+        .eq('id', user.id)
+        .select()
+        .single()
+      
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 })
+      }
+      
+      return NextResponse.json({ settings: data })
+    }
+    
     // Update receipt
     if (path[0] === 'receipts' && path[1]) {
       const body = await request.json()
