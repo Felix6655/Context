@@ -1072,6 +1072,17 @@ export async function PUT(request, { params }) {
         updateData.silence_threshold_days = body.silence_threshold_days
       }
       
+      // Add memory loop settings if provided
+      if (body.outcome_checks_enabled !== undefined) {
+        updateData.outcome_checks_enabled = body.outcome_checks_enabled
+      }
+      if (body.outcome_delay_days !== undefined) {
+        updateData.outcome_delay_days = body.outcome_delay_days
+      }
+      if (body.insights_enabled !== undefined) {
+        updateData.insights_enabled = body.insights_enabled
+      }
+      
       let result
       if (existing) {
         result = await authClient
