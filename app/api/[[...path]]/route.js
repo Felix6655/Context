@@ -449,6 +449,143 @@ export async function GET(request, { params }) {
       })
     }
     
+    // ============================================
+    // MEMORY LOOP ENDPOINTS
+    // ============================================
+    
+    // Get due outcome checks
+    if (pathStr === 'memory-loop/outcome-checks') {
+      const { data: profile } = await authClient
+        .from('profiles')
+        .select('outcome_checks_enabled, outcome_delay_days')
+        .eq('id', user.id)
+        .single()
+      
+      const settings = profile || {}
+      
+      if (settings.outcome_checks_enabled === false) {
+        return NextResponse.json({ checks: [], enabled: false })
+      }
+      
+      // Get receipts
+      const { data: receipts } = await authClient
+        .from('receipts')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+      
+      // Get existing outcomes
+      const { data: existingOutcomes } = await authClient
+        .from('decision_outcomes')
+        .select('receipt_id, outcome')
+        .eq('user_id', user.id)
+      
+      const dueChecks = findDueOutcomeChecks(
+        receipts || [], 
+        existingOutcomes || [], 
+        settings
+      )
+      
+      return NextResponse.json({ 
+        checks: dueChecks,
+        enabled: true 
+      })
+    }
+    
+    // Get outcome history
+    if (pathStr === 'memory-loop/outcomes') {
+      const { data: outcomes } = await authClient
+        .from('decision_outcomes')
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+      
+      return NextResponse.json({ outcomes: outcomes || [] })
+    }
+    
+    // Get pattern insights
+    if (pathStr === 'memory-loop/insights') {
+      const { data: profile } = await authClient
+        .from('profiles')
+        .select('insights_enabled')
+        .eq('id', user.id)
+        .single()
+      
+      if (profile?.insights_enabled === false) {
+        return NextResponse.json({ insights: [], patterns: [], enabled: false })
+      }
+      
+      // Get outcomes and receipts for analysis
+      const { data: outcomes } = await authClient
+        .from('decision_outcomes')
+        .select('*')
+        .eq('user_id', user.id)
+      
+      const { data: receipts } = await authClient
+        .from('receipts')
+        .select('*')
+        .eq('user_id', user.id)
+      
+      // Analyze patterns
+      const analysis = analyzeOutcomePatterns(outcomes || [], receipts || [])
+      
+      // Get existing insights
+      const { data: existingInsights } = await authClient
+        .from('insight_events')
+        .select('*')
+        .eq('user_id', user.id)
+      
+      // Get top new insight to surface
+      const topInsight = analysis.patterns.length > 0 
+        ? getTopInsight(analysis.patterns, existingInsights || [])
+        : null
+      
+      return NextResponse.json({
+        patterns: analysis.patterns,
+        topInsight,
+        sampleSize: analysis.sampleSize,
+        insufficientData: analysis.insufficientData,
+        enabled: true
+      })
+    }
+    
+    // Get memory loop settings
+    if (pathStr === 'memory-loop/settings') {
+      const { data: profile } = await authClient
+        .from('profiles')
+        .select(`
+          outcome_checks_enabled,
+          outcome_delay_days,
+          insights_enabled
+        `)
+        .eq('id', user.id)
+        .single()
+      
+      return NextResponse.json({ 
+        settings: profile || {
+          outcome_checks_enabled: true,
+          outcome_delay_days: 7,
+          insights_enabled: true
+        }
+      })
+    }
+    
+    // Get weekly learning data
+    if (pathStr === 'memory-loop/weekly-learning') {
+      const weekEnd = new Date()
+      const weekStart = new Date()
+      weekStart.setDate(weekStart.getDate() - 7)
+      
+      const { data: outcomes } = await authClient
+        .from('decision_outcomes')
+        .select('*')
+        .eq('user_id', user.id)
+      
+      const learning = generateWeeklyLearning(outcomes || [], weekStart, weekEnd)
+      
+      return NextResponse.json(learning)
+    }
+    
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
     
   } catch (error) {
