@@ -14,6 +14,7 @@ import {
 import { toast } from 'sonner'
 import { demoReceipts, demoMoments, demoPerspectiveCards, demoDeadZone } from '@/lib/demo-data'
 import { SilencePrompt, PerspectiveCard } from '@/components/reflection'
+import { OutcomeCheckPrompt, InsightCard } from '@/components/memory-loop'
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -31,6 +32,10 @@ export default function DashboardPage() {
   const [reflectionStatus, setReflectionStatus] = useState(null)
   const [silencePrompt, setSilencePrompt] = useState(null)
   const [contextualCard, setContextualCard] = useState(null)
+  
+  // Memory Loop State
+  const [outcomeCheck, setOutcomeCheck] = useState(null)
+  const [topInsight, setTopInsight] = useState(null)
   
   useEffect(() => {
     checkAuth()
