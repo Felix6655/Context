@@ -17,6 +17,15 @@ import {
   getUnreadCount,
   isWeeklyReflectionTime
 } from '../../../lib/notification-manager'
+import {
+  findDueOutcomeChecks,
+  createOutcomeCheck,
+  analyzeOutcomePatterns,
+  generateWeeklyLearning,
+  createInsightEvent,
+  shouldSurfaceInsight,
+  getTopInsight
+} from '../../../lib/memory-loop'
 import { v4 as uuidv4 } from 'uuid'
 
 // Helper to get current user from request
