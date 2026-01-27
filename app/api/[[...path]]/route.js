@@ -1015,6 +1015,7 @@ export async function POST(request, { params }) {
 
 export async function PUT(request, { params }) {
   const path = params.path || []
+  const pathStr = path.join('/')
   
   try {
     const authHeader = request.headers.get('authorization')
