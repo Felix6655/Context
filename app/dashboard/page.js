@@ -94,20 +94,24 @@ export default function DashboardPage() {
     try {
       const headers = getAuthHeaders()
       
-      const [receiptsRes, momentsRes, cardsRes, deadZoneRes, reflectionRes] = await Promise.all([
+      const [receiptsRes, momentsRes, cardsRes, deadZoneRes, reflectionRes, outcomeRes, insightsRes] = await Promise.all([
         fetch('/api/receipts', { headers }),
         fetch('/api/moments', { headers }),
         fetch('/api/perspective-cards', { headers }),
         fetch('/api/deadzone', { headers }),
-        fetch('/api/reflections/status', { headers })
+        fetch('/api/reflections/status', { headers }),
+        fetch('/api/memory-loop/outcome-checks', { headers }),
+        fetch('/api/memory-loop/insights', { headers })
       ])
       
-      const [receiptsData, momentsData, cardsData, deadZoneData, reflectionData] = await Promise.all([
+      const [receiptsData, momentsData, cardsData, deadZoneData, reflectionData, outcomeData, insightsData] = await Promise.all([
         receiptsRes.json(),
         momentsRes.json(),
         cardsRes.json(),
         deadZoneRes.json(),
-        reflectionRes.json()
+        reflectionRes.json(),
+        outcomeRes.json(),
+        insightsRes.json()
       ])
       
       setReceipts(receiptsData.receipts || [])
@@ -123,9 +127,84 @@ export default function DashboardPage() {
       if (reflectionData.perspectiveCards?.selected) {
         setContextualCard(reflectionData.perspectiveCards.selected)
       }
+      
+      // Memory Loop data
+      if (outcomeData.checks?.length > 0) {
+        setOutcomeCheck(outcomeData.checks[0])
+      }
+      if (insightsData.topInsight) {
+        setTopInsight(insightsData.topInsight)
+      }
     } catch (error) {
       console.error('Failed to load data:', error)
       toast.error('Failed to load data')
+    }
+  }
+  
+  // Memory Loop handlers
+  const handleOutcomeSubmit = async (data) => {
+    try {
+      const headers = { ...getAuthHeaders(), 'Content-Type': 'application/json' }
+      const res = await fetch('/api/memory-loop/outcomes', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(data)
+      })
+      
+      if (!res.ok) throw new Error('Failed to submit outcome')
+      
+      setOutcomeCheck(null)
+      toast.success('Outcome recorded')
+    } catch (error) {
+      toast.error('Failed to record outcome')
+      throw error
+    }
+  }
+  
+  const handleOutcomeDismiss = async (receiptId) => {
+    try {
+      const headers = { ...getAuthHeaders(), 'Content-Type': 'application/json' }
+      await fetch('/api/memory-loop/outcomes/dismiss', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ receipt_id: receiptId })
+      })
+      setOutcomeCheck(null)
+    } catch (error) {
+      console.error('Failed to dismiss outcome check:', error)
+    }
+  }
+  
+  const handleInsightDismiss = async (insightId) => {
+    try {
+      // First, surface it (create record if needed)
+      if (topInsight && !topInsight.id) {
+        const headers = { ...getAuthHeaders(), 'Content-Type': 'application/json' }
+        const surfaceRes = await fetch('/api/memory-loop/insights/surface', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            type: topInsight.type,
+            key: topInsight.key,
+            pattern_data: topInsight,
+            sample_size: topInsight.sampleSize,
+            signal_strength: topInsight.signalStrength,
+            message: topInsight.message
+          })
+        })
+        const surfaceData = await surfaceRes.json()
+        insightId = surfaceData.insight?.id
+      }
+      
+      if (insightId) {
+        await fetch(`/api/memory-loop/insights/${insightId}/dismiss`, {
+          method: 'POST',
+          headers: getAuthHeaders()
+        })
+      }
+      setTopInsight(null)
+    } catch (error) {
+      console.error('Failed to dismiss insight:', error)
     }
   }
   
