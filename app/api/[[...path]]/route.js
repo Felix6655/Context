@@ -874,6 +874,137 @@ export async function POST(request, { params }) {
       return NextResponse.json({ success: true })
     }
     
+    // ============================================
+    // MEMORY LOOP POST ENDPOINTS
+    // ============================================
+    
+    // Submit outcome check
+    if (pathStr === 'memory-loop/outcomes') {
+      const body = await request.json()
+      
+      // Get receipt for context
+      const { data: receipt } = await authClient
+        .from('receipts')
+        .select('confidence, emotions, decision_type')
+        .eq('id', body.receipt_id)
+        .eq('user_id', user.id)
+        .single()
+      
+      if (!receipt) {
+        return NextResponse.json({ error: 'Receipt not found' }, { status: 404 })
+      }
+      
+      const outcome = {
+        id: uuidv4(),
+        user_id: user.id,
+        receipt_id: body.receipt_id,
+        scheduled_at: new Date().toISOString(),
+        completed_at: new Date().toISOString(),
+        outcome: body.outcome,
+        assumption_delta: body.assumption_delta || null,
+        original_confidence: receipt.confidence,
+        original_emotions: receipt.emotions || [],
+        decision_type: receipt.decision_type,
+        prompted: true,
+        prompted_at: new Date().toISOString()
+      }
+      
+      const { data, error } = await authClient
+        .from('decision_outcomes')
+        .insert([outcome])
+        .select()
+        .single()
+      
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 })
+      }
+      
+      // Update last outcome check timestamp
+      await authClient
+        .from('profiles')
+        .update({ last_outcome_check_at: new Date().toISOString() })
+        .eq('id', user.id)
+      
+      return NextResponse.json({ outcome: data })
+    }
+    
+    // Dismiss outcome check (without recording outcome)
+    if (pathStr === 'memory-loop/outcomes/dismiss') {
+      const body = await request.json()
+      
+      const outcome = {
+        id: uuidv4(),
+        user_id: user.id,
+        receipt_id: body.receipt_id,
+        scheduled_at: new Date().toISOString(),
+        completed_at: new Date().toISOString(),
+        outcome: 'dismissed',
+        prompted: true,
+        prompted_at: new Date().toISOString()
+      }
+      
+      const { data, error } = await authClient
+        .from('decision_outcomes')
+        .insert([outcome])
+        .select()
+        .single()
+      
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 })
+      }
+      
+      return NextResponse.json({ success: true })
+    }
+    
+    // Surface an insight (mark as shown)
+    if (pathStr === 'memory-loop/insights/surface') {
+      const body = await request.json()
+      
+      // Create insight record if it doesn't exist
+      const insight = {
+        id: uuidv4(),
+        user_id: user.id,
+        insight_type: body.type,
+        pattern_key: body.key,
+        pattern_data: body.pattern_data || {},
+        sample_size: body.sample_size || 0,
+        signal_strength: body.signal_strength || 0,
+        message: body.message,
+        surfaced: true,
+        surfaced_at: new Date().toISOString(),
+        dismissed: false
+      }
+      
+      const { data, error } = await authClient
+        .from('insight_events')
+        .insert([insight])
+        .select()
+        .single()
+      
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 })
+      }
+      
+      return NextResponse.json({ insight: data })
+    }
+    
+    // Dismiss an insight
+    if (path[0] === 'memory-loop' && path[1] === 'insights' && path[2] && path[3] === 'dismiss') {
+      const insightId = path[2]
+      
+      const { error } = await authClient
+        .from('insight_events')
+        .update({ dismissed: true, dismissed_at: new Date().toISOString() })
+        .eq('id', insightId)
+        .eq('user_id', user.id)
+      
+      if (error) {
+        return NextResponse.json({ error: error.message }, { status: 500 })
+      }
+      
+      return NextResponse.json({ success: true })
+    }
+    
     return NextResponse.json({ error: 'Not found' }, { status: 404 })
     
   } catch (error) {
